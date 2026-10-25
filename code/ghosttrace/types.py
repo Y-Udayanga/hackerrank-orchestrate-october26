@@ -39,10 +39,19 @@ class Intent(BaseModel):
     reason: str
 
 
+class IntentItem(Intent):
+    request_index: int
+
+
+class IntentBatch(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    requests: list[IntentItem]
+
+
 class VisualRecord(BaseModel):
     model_config = ConfigDict(extra='forbid')
     system_id: str
-    resource_id: str
+    resource_id: str = Field(pattern=r'^[a-z][a-z_]*_[0-9]+$')
     category: str
     state: Literal['PRESENT', 'ABSENT', 'REDACTED', 'ANONYMIZED', 'ACTIVE', 'DISABLED', 'BLOCKED']
     identifiers: list[str]
@@ -108,3 +117,15 @@ def validate_steps(status: str, steps: list[dict], known_evidence: set[str]) -> 
         raise ValueError('Incorrect phase/operation order')
     if status == 'COMPLETE' and not steps:
         raise ValueError('Completion requires proof')
+    if status == 'INCOMPLETE':
+        pairs={'REPORT_REMAINING_RECORD':('DELETE_RECORD','VERIFY_RECORD_ABSENT'),
+               'REPORT_EXPOSED_PII':(('REDACT_RECORD','VERIFY_RECORD_REDACTED'),('ANONYMIZE_RECORD','VERIFY_RECORD_ANONYMIZED')),
+               'REPORT_ACTIVE_DATA_FLOW':('DISABLE_DATA_FLOW','VERIFY_DATA_FLOW_DISABLED'),
+               'REPORT_RESTORE_RISK':('BLOCK_RESTORE','VERIFY_RESTORE_BLOCKED')}
+        for s in steps:
+            if s['phase']=='FINDING':
+                options=pairs[s['operation']]
+                if isinstance(options[0],str):options=(options,)
+                if not any(('REMEDIATION',s['system_id'],s['resource_id'],r) in seen and
+                           ('VERIFICATION',s['system_id'],s['resource_id'],v) in seen for r,v in options):
+                    raise ValueError('Finding lacks required remediation and verification')

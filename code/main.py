@@ -45,6 +45,11 @@ Total generated/request tokens including reported thinking: {total}.
 Average per request: {total/max(1,count):.3f}.
 Estimated total and per-request cost: {price}
 
+Price source: https://ai.google.dev/gemini-api/docs/pricing (verified 2026-10-25).
+The standard text/image rates used for Gemini 3.1 Flash-Lite are USD 0.25 input
+and USD 1.50 output (including thinking) per million tokens. Gemini 3.8 Flash
+introductory rates expire 2026-12-31; reverify them for later runs.
+
 One provider/model only; the table also represents overall totals. Cache hits make
 no model call and incur no new tokens. Discovery is separately counted. Failed
 calls with no usage metadata have unknown provider-side token usage; recorded
@@ -83,6 +88,8 @@ def main():
     corpus=Corpus(args.dataset,gemini,strict=not args.allow_evidence_errors).load()
     logging.info('Indexed %d observations; %d evidence errors',len(corpus.observations),len(corpus.errors))
     auditor=Auditor(args.dataset,corpus,gemini)
+    from ghosttrace.intent import classify_many
+    auditor.intent_cache=classify_many(requests,gemini)
     rows=[]
     for i,request in enumerate(sorted(requests,key=lambda r:r['case_id']),1):
         rows.append(auditor.predict(request))

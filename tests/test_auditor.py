@@ -195,3 +195,34 @@ def test_future_email_change_does_not_match():
 
 def test_quoted_request_is_not_authorization():
     assert classify('What does "delete my account" mean?').intent!='DELETE_REQUEST'
+
+
+def test_new_primary_absence_does_not_clear_known_replica(setup):
+    replica=obs();replica.method='sqlite';replica.location='customer_profiles_failover_replica'
+    primary=obs(state='ABSENT',time='2026-01-10T00:00:00Z',eid='primary-new')
+    assert run(setup,[replica,primary])[0]=='INCOMPLETE'
+
+
+def test_missing_verification_is_rejected():
+    steps=[dict(step_no=1,phase='FINDING',system_id='account_service',resource_id='p',
+                operation='REPORT_REMAINING_RECORD',state='PRESENT',evidence_id='proof')]
+    with pytest.raises(ValueError,match='remediation and verification'):validate_steps('INCOMPLETE',steps,{'proof'})
+
+
+def test_visual_schema_rejects_email_resource():
+    from ghosttrace.types import VisualRecord
+    with pytest.raises(ValueError):VisualRecord(system_id='account_service',resource_id='alex@example.test',category='USER_PROFILE',
+        state='PRESENT',identifiers=['alex@example.test'],supporting_text='Email alex@example.test')
+
+
+def test_intent_batch_coverage_and_grounding():
+    from ghosttrace.intent import classify_many
+    from ghosttrace.types import IntentBatch,IntentItem
+    class Fake:
+        def generate(self,*args):
+            return IntentBatch(requests=[IntentItem(request_index=7,intent='DELETE_REQUEST',quote='invented',reason='test')])
+    with pytest.raises(ValueError):classify_many([{'request_text':'Could you verify the earlier removal?'}],Fake())
+
+
+def test_explicit_later_negation_defeats_fast_path():
+    assert classify('Please delete my account. Actually, do not delete it.').intent!='DELETE_REQUEST'

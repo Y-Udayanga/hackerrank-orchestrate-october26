@@ -1,28 +1,24 @@
 # Ingestion report
 
-2415 observations.
+2459 observations.
 
 Errors:
-- {"evidence_id": "evidence_04", "error": "RuntimeError", "detail": "Image interpretation unavailable in offline mode"}
-- {"evidence_id": "evidence_09", "error": "RuntimeError", "detail": "Image interpretation unavailable in offline mode"}
-- {"evidence_id": "evidence_14", "error": "RuntimeError", "detail": "Image interpretation unavailable in offline mode"}
-- {"evidence_id": "evidence_19", "error": "RuntimeError", "detail": "Image interpretation unavailable in offline mode"}
-- {"evidence_id": "evidence_23", "error": "RuntimeError", "detail": "Image interpretation unavailable in offline mode"}
-- {"evidence_id": "evidence_28", "error": "RuntimeError", "detail": "Image interpretation unavailable in offline mode"}
-- {"evidence_id": "evidence_32", "error": "RuntimeError", "detail": "Image interpretation unavailable in offline mode"}
-- {"evidence_id": "evidence_37", "error": "RuntimeError", "detail": "Image interpretation unavailable in offline mode"}
-- {"evidence_id": "evidence_42", "error": "RuntimeError", "detail": "Image interpretation unavailable in offline mode"}
-- {"evidence_id": "evidence_46", "error": "RuntimeError", "detail": "Image interpretation unavailable in offline mode"}
-- {"evidence_id": "evidence_60", "error": "RuntimeError", "detail": "Image interpretation unavailable in offline mode"}
+
 
 Notes:
-- evidence_18: PyMuPDF unavailable; pypdf text fallback
+- evidence_04: None
+- evidence_09: None
+- evidence_14: The system_id 'integration_service' is inferred based on the context of 'BridgeOps' and 'Connections' management, as no explicit system ID was provided in the UI text.
 - No actionable resource observations in evidence_18
+- evidence_19: None
 - No actionable resource observations in evidence_21
-- evidence_27: PyMuPDF unavailable; pypdf text fallback
+- evidence_23: None
 - No actionable resource observations in evidence_27
+- evidence_28: None
+- evidence_32: None
+- evidence_37: None
+- evidence_42: The system_id for 'Orders' and 'Finance' was inferred as 'account_service' based on the context of the 'Account Platform' owner team and the nature of the records, though the UI does not explicitly label the system backend.
+- evidence_46: None
 - No actionable resource observations in evidence_48
-- evidence_55: PyMuPDF unavailable; pypdf text fallback
-- evidence_58: PyMuPDF unavailable; pypdf text fallback
-- No actionable resource observations in evidence_61
+- evidence_60: The resource ID 'marketing_001' is treated as the primary identifier for the marketing profile based on its placement in the UI. Other data points (audience membership, activity logs) are attributes of this profile rather than distinct, independently addressable resource records.
 - No actionable resource observations in evidence_90

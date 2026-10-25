@@ -13,20 +13,20 @@ matches score zero. Extra steps are penalized in precision, not field denominato
 ## Measured results
 
 - cases: 32
-- status_correct: 22
-- status_accuracy: 0.6875
+- status_correct: 29
+- status_accuracy: 0.90625
 - exact_sequences: 8
 - sequence_accuracy: 0.25
 - ordering_only_errors: 0
-- step_tp: 137
-- step_fp: 15
-- step_fn: 56
-- step_precision: 0.9013157894736842
-- step_recall: 0.7098445595854922
-- step_f1: 0.7942028985507247
-- fields: {"phase": 0.7823834196891192, "system_id": 0.7823834196891192, "resource_id": 0.7823834196891192, "operation": 0.7823834196891192, "state": 0.7823834196891192, "evidence_id": 0.7098445595854922, "step_no": 0.5803108808290155}
-- confusion: {"COMPLETE -> INCOMPLETE": 8, "COMPLETE -> NOT_APPLICABLE": 2, "INCOMPLETE -> INCOMPLETE": 22}
-- operations: {"missing VERIFY_RECORD_ABSENT": 23, "missing VERIFY_RECORD_PRESENT": 14, "missing VERIFY_RECORD_ANONYMIZED": 7, "extra VERIFY_RECORD_ABSENT": 2, "extra VERIFY_RECORD_PRESENT": 6, "missing REPORT_REMAINING_RECORD": 1, "missing DELETE_RECORD": 1, "missing VERIFY_RECORD_REDACTED": 4, "missing VERIFY_DATA_FLOW_DISABLED": 3, "missing VERIFY_RESTORE_BLOCKED": 3, "extra VERIFY_RECORD_REDACTED": 3, "extra VERIFY_DATA_FLOW_DISABLED": 2, "extra VERIFY_RESTORE_BLOCKED": 2}
+- step_tp: 158
+- step_fp: 1
+- step_fn: 35
+- step_precision: 0.9937106918238994
+- step_recall: 0.8186528497409327
+- step_f1: 0.8977272727272727
+- fields: {"phase": 0.8186528497409327, "system_id": 0.8186528497409327, "resource_id": 0.8186528497409327, "operation": 0.8186528497409327, "state": 0.8186528497409327, "evidence_id": 0.8186528497409327, "step_no": 0.5906735751295337}
+- confusion: {"COMPLETE -> INCOMPLETE": 3, "COMPLETE -> COMPLETE": 7, "INCOMPLETE -> INCOMPLETE": 22}
+- operations: {"missing VERIFY_RECORD_ABSENT": 21, "missing VERIFY_RECORD_ANONYMIZED": 7, "missing VERIFY_RECORD_PRESENT": 7, "extra VERIFY_RECORD_ABSENT": 1}
 - format_invalid: []
 
 ## Every sample failure
@@ -50,11 +50,11 @@ Extra/incorrect steps:
 ```json
 []
 ```
-Investigation gaps: ["No grounded resource state available by audit cutoff", "Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: ["No grounded resource state available by audit cutoff"]
 
 Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
-### case_02: expected COMPLETE, predicted NOT_APPLICABLE
+### case_02: expected COMPLETE, predicted INCOMPLETE
 
 Missing steps:
 ```json
@@ -73,31 +73,15 @@ Extra/incorrect steps:
 ```json
 []
 ```
-Investigation gaps: []
+Investigation gaps: ["No grounded resource state available by audit cutoff"]
 
 Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
-### case_03: expected COMPLETE, predicted INCOMPLETE
+### case_03: expected COMPLETE, predicted COMPLETE
 
 Missing steps:
 ```json
 [
-  {
-    "phase": "VERIFICATION",
-    "system_id": "account_service",
-    "resource_id": "account_7566",
-    "operation": "VERIFY_RECORD_ABSENT",
-    "state": "ABSENT",
-    "evidence_id": "evidence_94"
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "security_service",
-    "resource_id": "audit_record_2016",
-    "operation": "VERIFY_RECORD_PRESENT",
-    "state": "PRESENT",
-    "evidence_id": "evidence_94"
-  },
   {
     "phase": "VERIFICATION",
     "system_id": "analytics_platform",
@@ -110,28 +94,11 @@ Missing steps:
 ```
 Extra/incorrect steps:
 ```json
-[
-  {
-    "phase": "VERIFICATION",
-    "system_id": "account_service",
-    "resource_id": "account_7566",
-    "operation": "VERIFY_RECORD_ABSENT",
-    "state": "ABSENT",
-    "evidence_id": ""
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "security_service",
-    "resource_id": "audit_record_2016",
-    "operation": "VERIFY_RECORD_PRESENT",
-    "state": "PRESENT",
-    "evidence_id": ""
-  }
-]
+[]
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
-Diagnosis: shared operations differ in state or evidence provenance; inspect timeline and source precedence.
+Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
 ### case_04: expected COMPLETE, predicted INCOMPLETE
 
@@ -160,7 +127,7 @@ Extra/incorrect steps:
 ```json
 []
 ```
-Investigation gaps: ["No grounded resource state available by audit cutoff", "Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: ["No grounded resource state available by audit cutoff"]
 
 Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
@@ -183,7 +150,7 @@ Extra/incorrect steps:
 ```json
 []
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
 Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
@@ -206,7 +173,7 @@ Extra/incorrect steps:
 ```json
 []
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
 Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
@@ -229,7 +196,7 @@ Extra/incorrect steps:
 ```json
 []
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
 Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
@@ -260,7 +227,7 @@ Extra/incorrect steps:
 ```json
 []
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
 Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
@@ -270,33 +237,9 @@ Missing steps:
 ```json
 [
   {
-    "phase": "FINDING",
-    "system_id": "support_platform",
-    "resource_id": "support_002",
-    "operation": "REPORT_REMAINING_RECORD",
-    "state": "PRESENT",
-    "evidence_id": "evidence_61"
-  },
-  {
-    "phase": "REMEDIATION",
-    "system_id": "support_platform",
-    "resource_id": "support_002",
-    "operation": "DELETE_RECORD",
-    "state": "ABSENT",
-    "evidence_id": ""
-  },
-  {
     "phase": "VERIFICATION",
     "system_id": "account_service",
     "resource_id": "account_010",
-    "operation": "VERIFY_RECORD_ABSENT",
-    "state": "ABSENT",
-    "evidence_id": ""
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "support_platform",
-    "resource_id": "support_002",
     "operation": "VERIFY_RECORD_ABSENT",
     "state": "ABSENT",
     "evidence_id": ""
@@ -307,7 +250,7 @@ Extra/incorrect steps:
 ```json
 []
 ```
-Investigation gaps: ["No grounded resource state available by audit cutoff", "Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
 Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
@@ -330,7 +273,7 @@ Extra/incorrect steps:
   }
 ]
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
 ### case_18: expected INCOMPLETE, predicted INCOMPLETE
 
@@ -359,7 +302,7 @@ Extra/incorrect steps:
 ```json
 []
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
 Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
@@ -390,11 +333,11 @@ Extra/incorrect steps:
 ```json
 []
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
 Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
-### case_21: expected COMPLETE, predicted INCOMPLETE
+### case_21: expected COMPLETE, predicted COMPLETE
 
 Missing steps:
 ```json
@@ -409,14 +352,6 @@ Missing steps:
   },
   {
     "phase": "VERIFICATION",
-    "system_id": "security_service",
-    "resource_id": "audit_record_3737",
-    "operation": "VERIFY_RECORD_PRESENT",
-    "state": "PRESENT",
-    "evidence_id": "evidence_92"
-  },
-  {
-    "phase": "VERIFICATION",
     "system_id": "analytics_platform",
     "resource_id": "analytics_5335",
     "operation": "VERIFY_RECORD_ANONYMIZED",
@@ -427,20 +362,11 @@ Missing steps:
 ```
 Extra/incorrect steps:
 ```json
-[
-  {
-    "phase": "VERIFICATION",
-    "system_id": "security_service",
-    "resource_id": "audit_record_3737",
-    "operation": "VERIFY_RECORD_PRESENT",
-    "state": "PRESENT",
-    "evidence_id": ""
-  }
-]
+[]
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
-Diagnosis: shared operations differ in state or evidence provenance; inspect timeline and source precedence.
+Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
 ### case_22: expected INCOMPLETE, predicted INCOMPLETE
 
@@ -461,7 +387,7 @@ Extra/incorrect steps:
 ```json
 []
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
 Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
@@ -492,7 +418,7 @@ Extra/incorrect steps:
 ```json
 []
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
 Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
@@ -515,11 +441,11 @@ Extra/incorrect steps:
 ```json
 []
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
 Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
-### case_25: expected COMPLETE, predicted INCOMPLETE
+### case_25: expected COMPLETE, predicted COMPLETE
 
 Missing steps:
 ```json
@@ -534,14 +460,6 @@ Missing steps:
   },
   {
     "phase": "VERIFICATION",
-    "system_id": "security_service",
-    "resource_id": "audit_record_451",
-    "operation": "VERIFY_RECORD_PRESENT",
-    "state": "PRESENT",
-    "evidence_id": "evidence_92"
-  },
-  {
-    "phase": "VERIFICATION",
     "system_id": "analytics_platform",
     "resource_id": "analytics_1895",
     "operation": "VERIFY_RECORD_ANONYMIZED",
@@ -552,22 +470,13 @@ Missing steps:
 ```
 Extra/incorrect steps:
 ```json
-[
-  {
-    "phase": "VERIFICATION",
-    "system_id": "security_service",
-    "resource_id": "audit_record_451",
-    "operation": "VERIFY_RECORD_PRESENT",
-    "state": "PRESENT",
-    "evidence_id": ""
-  }
-]
+[]
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
-Diagnosis: shared operations differ in state or evidence provenance; inspect timeline and source precedence.
+Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
-### case_26: expected COMPLETE, predicted NOT_APPLICABLE
+### case_26: expected COMPLETE, predicted COMPLETE
 
 Missing steps:
 ```json
@@ -582,42 +491,10 @@ Missing steps:
   },
   {
     "phase": "VERIFICATION",
-    "system_id": "security_service",
-    "resource_id": "audit_record_5416",
-    "operation": "VERIFY_RECORD_PRESENT",
-    "state": "PRESENT",
-    "evidence_id": "evidence_92"
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "support_platform",
-    "resource_id": "support_4715",
-    "operation": "VERIFY_RECORD_REDACTED",
-    "state": "REDACTED",
-    "evidence_id": "evidence_92"
-  },
-  {
-    "phase": "VERIFICATION",
     "system_id": "analytics_platform",
     "resource_id": "analytics_4566",
     "operation": "VERIFY_RECORD_ANONYMIZED",
     "state": "ANONYMIZED",
-    "evidence_id": "evidence_92"
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "integration_service",
-    "resource_id": "data_flow_6244",
-    "operation": "VERIFY_DATA_FLOW_DISABLED",
-    "state": "DISABLED",
-    "evidence_id": "evidence_92"
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "backup_service",
-    "resource_id": "backup_3120",
-    "operation": "VERIFY_RESTORE_BLOCKED",
-    "state": "BLOCKED",
     "evidence_id": "evidence_92"
   }
 ]
@@ -626,11 +503,11 @@ Extra/incorrect steps:
 ```json
 []
 ```
-Investigation gaps: ["Deletion authorization ambiguous; no destructive plan authorized"]
+Investigation gaps: []
 
 Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
-### case_27: expected COMPLETE, predicted INCOMPLETE
+### case_27: expected COMPLETE, predicted COMPLETE
 
 Missing steps:
 ```json
@@ -645,88 +522,23 @@ Missing steps:
   },
   {
     "phase": "VERIFICATION",
-    "system_id": "security_service",
-    "resource_id": "audit_record_3830",
-    "operation": "VERIFY_RECORD_PRESENT",
-    "state": "PRESENT",
-    "evidence_id": "evidence_92"
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "support_platform",
-    "resource_id": "support_4707",
-    "operation": "VERIFY_RECORD_REDACTED",
-    "state": "REDACTED",
-    "evidence_id": "evidence_92"
-  },
-  {
-    "phase": "VERIFICATION",
     "system_id": "analytics_platform",
     "resource_id": "analytics_4574",
     "operation": "VERIFY_RECORD_ANONYMIZED",
     "state": "ANONYMIZED",
-    "evidence_id": "evidence_92"
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "integration_service",
-    "resource_id": "data_flow_2295",
-    "operation": "VERIFY_DATA_FLOW_DISABLED",
-    "state": "DISABLED",
-    "evidence_id": "evidence_92"
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "backup_service",
-    "resource_id": "backup_5970",
-    "operation": "VERIFY_RESTORE_BLOCKED",
-    "state": "BLOCKED",
     "evidence_id": "evidence_92"
   }
 ]
 ```
 Extra/incorrect steps:
 ```json
-[
-  {
-    "phase": "VERIFICATION",
-    "system_id": "security_service",
-    "resource_id": "audit_record_3830",
-    "operation": "VERIFY_RECORD_PRESENT",
-    "state": "PRESENT",
-    "evidence_id": ""
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "support_platform",
-    "resource_id": "support_4707",
-    "operation": "VERIFY_RECORD_REDACTED",
-    "state": "REDACTED",
-    "evidence_id": ""
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "integration_service",
-    "resource_id": "data_flow_2295",
-    "operation": "VERIFY_DATA_FLOW_DISABLED",
-    "state": "DISABLED",
-    "evidence_id": ""
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "backup_service",
-    "resource_id": "backup_5970",
-    "operation": "VERIFY_RESTORE_BLOCKED",
-    "state": "BLOCKED",
-    "evidence_id": ""
-  }
-]
+[]
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
-Diagnosis: shared operations differ in state or evidence provenance; inspect timeline and source precedence.
+Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
-### case_28: expected COMPLETE, predicted INCOMPLETE
+### case_28: expected COMPLETE, predicted COMPLETE
 
 Missing steps:
 ```json
@@ -741,86 +553,21 @@ Missing steps:
   },
   {
     "phase": "VERIFICATION",
-    "system_id": "security_service",
-    "resource_id": "audit_record_9265",
-    "operation": "VERIFY_RECORD_PRESENT",
-    "state": "PRESENT",
-    "evidence_id": "evidence_92"
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "support_platform",
-    "resource_id": "support_2351",
-    "operation": "VERIFY_RECORD_REDACTED",
-    "state": "REDACTED",
-    "evidence_id": "evidence_92"
-  },
-  {
-    "phase": "VERIFICATION",
     "system_id": "analytics_platform",
     "resource_id": "analytics_6077",
     "operation": "VERIFY_RECORD_ANONYMIZED",
     "state": "ANONYMIZED",
-    "evidence_id": "evidence_92"
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "integration_service",
-    "resource_id": "data_flow_2337",
-    "operation": "VERIFY_DATA_FLOW_DISABLED",
-    "state": "DISABLED",
-    "evidence_id": "evidence_92"
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "backup_service",
-    "resource_id": "backup_838",
-    "operation": "VERIFY_RESTORE_BLOCKED",
-    "state": "BLOCKED",
     "evidence_id": "evidence_92"
   }
 ]
 ```
 Extra/incorrect steps:
 ```json
-[
-  {
-    "phase": "VERIFICATION",
-    "system_id": "security_service",
-    "resource_id": "audit_record_9265",
-    "operation": "VERIFY_RECORD_PRESENT",
-    "state": "PRESENT",
-    "evidence_id": ""
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "support_platform",
-    "resource_id": "support_2351",
-    "operation": "VERIFY_RECORD_REDACTED",
-    "state": "REDACTED",
-    "evidence_id": ""
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "integration_service",
-    "resource_id": "data_flow_2337",
-    "operation": "VERIFY_DATA_FLOW_DISABLED",
-    "state": "DISABLED",
-    "evidence_id": ""
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "backup_service",
-    "resource_id": "backup_838",
-    "operation": "VERIFY_RESTORE_BLOCKED",
-    "state": "BLOCKED",
-    "evidence_id": ""
-  }
-]
+[]
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
-Diagnosis: shared operations differ in state or evidence provenance; inspect timeline and source precedence.
+Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
 ### case_29: expected INCOMPLETE, predicted INCOMPLETE
 
@@ -849,7 +596,7 @@ Extra/incorrect steps:
 ```json
 []
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
 Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
@@ -880,11 +627,11 @@ Extra/incorrect steps:
 ```json
 []
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
 Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
-### case_31: expected COMPLETE, predicted INCOMPLETE
+### case_31: expected COMPLETE, predicted COMPLETE
 
 Missing steps:
 ```json
@@ -896,49 +643,16 @@ Missing steps:
     "operation": "VERIFY_RECORD_ABSENT",
     "state": "ABSENT",
     "evidence_id": "evidence_51"
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "security_service",
-    "resource_id": "audit_record_6909",
-    "operation": "VERIFY_RECORD_PRESENT",
-    "state": "PRESENT",
-    "evidence_id": "evidence_51"
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "identity_service",
-    "resource_id": "tombstone_440",
-    "operation": "VERIFY_RECORD_REDACTED",
-    "state": "REDACTED",
-    "evidence_id": "evidence_51"
   }
 ]
 ```
 Extra/incorrect steps:
 ```json
-[
-  {
-    "phase": "VERIFICATION",
-    "system_id": "security_service",
-    "resource_id": "audit_record_6909",
-    "operation": "VERIFY_RECORD_PRESENT",
-    "state": "PRESENT",
-    "evidence_id": ""
-  },
-  {
-    "phase": "VERIFICATION",
-    "system_id": "identity_service",
-    "resource_id": "tombstone_440",
-    "operation": "VERIFY_RECORD_REDACTED",
-    "state": "REDACTED",
-    "evidence_id": ""
-  }
-]
+[]
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
-Diagnosis: shared operations differ in state or evidence provenance; inspect timeline and source precedence.
+Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
 ### case_32: expected INCOMPLETE, predicted INCOMPLETE
 
@@ -959,7 +673,39 @@ Extra/incorrect steps:
 ```json
 []
 ```
-Investigation gaps: ["Evidence coverage incomplete; inspect ingestion report"]
+Investigation gaps: []
 
 Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.
 
+
+## Independent manually reasoned evaluation cases
+
+These synthetic fixtures are generated under pytest temporary directories and never
+inserted into the challenge dataset. Expected decisions are authored independently
+of the public answers. See tests/test_auditor.py for executable evidence and assertions.
+
+| Scenario | Expected reasoning/result |
+|---|---|
+| Data access request | NOT_APPLICABLE, no steps |
+| Explicit do-not-delete | NOT_APPLICABLE, no steps |
+| Profile remains | INCOMPLETE, finding/delete/verify absent |
+| Profile absent; security retained | COMPLETE, verify absent and present |
+| Historical email | Old exact address resolves to same stable subject |
+| Recreation with active sync | INCOMPLETE; disable flow before delete |
+| Old screenshot, newer absence | COMPLETE using newer direct evidence |
+| Capture after cutoff | Ignore later capture; existing violation remains |
+| Event after cutoff | Ignore later event even with inconsistent earlier capture |
+| Active restore access | Report risk, block restore, verify blocked |
+| Tombstone exposes email | Redact; do not delete stable internal reference |
+| Clean tombstone | COMPLETE, verify redacted |
+| Primary absent, replica present | INCOMPLETE; replica presence defeats absence |
+| Unrelated customer attachment | Excluded from subject plan |
+| Missing/corrupt evidence | Strict ingestion fails visibly |
+| Identical names | Name does not join resources |
+| Future identity association | Cannot link an earlier anonymous resource |
+| No evidence | INCOMPLETE with explicit investigation gap |
+| Debug cache miss | Not proof of profile absence; completed lookup required |
+| SQL attachment attempt | Denied by SQLite authorizer |
+| SQL nested JSON | Parsed into typed observed state |
+| Future email change | New email cannot resolve a past subject |
+| Quoted deletion phrase | Not deletion authorization |

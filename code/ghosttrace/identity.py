@@ -44,8 +44,12 @@ class IdentityGraph:
     def __init__(self, snapshots: list[dict], changes: list[dict]):
         self.snapshots = {r['user_id']: r for r in snapshots}
         self.changes = defaultdict(list)
+        self.email_candidates = defaultdict(set)
+        for row in snapshots:self.email_candidates[normalize(row['email'])].add(row['user_id'])
         for r in sorted(changes, key=lambda r: timestamp(r['event_time'])):
             self.changes[r['user_id']].append(r)
+            if r['field_name']=='email':
+                for value in (r['old_value'],r['new_value']):self.email_candidates[normalize(value)].add(r['user_id'])
 
     def subject(self, user_id: str, cutoff: str) -> Subject:
         snapshot = dict(self.snapshots[user_id])
@@ -74,7 +78,7 @@ class IdentityGraph:
 
     def resolve(self, email: str, cutoff: str) -> Subject:
         value = normalize(email)
-        matches = [s for user in self.snapshots if value in (s := self.subject(user, cutoff)).identifiers]
+        matches = [s for user in self.email_candidates.get(value,()) if value in (s := self.subject(user, cutoff)).identifiers]
         if len(matches) != 1:
             raise ValueError(f'Identity resolution requires one exact owner; found {len(matches)}')
         return matches[0]

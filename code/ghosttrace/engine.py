@@ -14,6 +14,7 @@ class Auditor:
         self.identities=IdentityGraph(read_csv(dataset/'user_identities.csv'),read_csv(dataset/'user_audit_log.csv'))
         self.policy=Policy(dataset/'deletion_rules.csv')
         self.gemini=gemini
+        self.intent_cache={}
         self.diagnostics=[]
         self.known_evidence={m['file_id'] for m in corpus.manifest}|{a['activity_id'] for a in corpus.activities}
         self.known_evidence|={r['audit_id'] for r in read_csv(dataset/'user_audit_log.csv')}
@@ -34,12 +35,22 @@ class Auditor:
         # Recency first; at identical observation times an actual remaining copy
         # beats a clear primary. File order/IDs do not influence semantic state.
         rank={'sqlite':4,'json':4,'gemini-vision':4,'pdf-text':4,'text':3,'log-readback':3,'csv':4}
-        return max(observations,key=lambda o:(timestamp(o.event_time),o.state in {'PRESENT','ACTIVE'},
+        selected=max(observations,key=lambda o:(timestamp(o.event_time),o.state in {'PRESENT','ACTIVE'},
                    rank.get(o.method,0),timestamp(o.captured_at),o.evidence_id))
+        # A later primary lookup cannot erase a proven replica copy. Keep a
+        # separate timeline for each explicitly named replica table.
+        replicas=defaultdict(list)
+        for o in observations:
+            if o.method=='sqlite' and 'replica' in o.location:replicas[o.location].append(o)
+        for scope,history in replicas.items():
+            replica=max(history,key=lambda o:timestamp(o.event_time))
+            if replica.state in {'PRESENT','ACTIVE'} and selected.state not in {'PRESENT','ACTIVE'}:
+                selected=replica
+        return selected
 
     def predict(self,request):
         cutoff=request['audit_at']
-        intent=classify(request['request_text'],self.gemini)
+        intent=self.intent_cache.get(request['request_text']) or classify(request['request_text'],self.gemini)
         diagnostic={'case_id':request['case_id'],'intent':intent.model_dump(),'gaps':[], 'resources':[]}
         self.diagnostics.append(diagnostic)
         if intent.intent!='DELETE_REQUEST':
@@ -73,6 +84,9 @@ class Auditor:
                     continue
                 violations.append((obs,remedy,state,finding))
         if not desired:diagnostic['gaps'].append('No grounded resource state available by audit cutoff')
+        elif 'account' in request['request_text'].casefold() and not any(
+                o.category in {'USER_PROFILE','ACCOUNT_TOMBSTONE'} for o,_,_ in desired):
+            diagnostic['gaps'].append('Account deletion audit lacks a grounded profile or tombstone state')
         if self.corpus.errors:diagnostic['gaps'].append('Evidence coverage incomplete; inspect ingestion report')
         status='INCOMPLETE' if violations or diagnostic['gaps'] else 'COMPLETE'
         steps=[]
