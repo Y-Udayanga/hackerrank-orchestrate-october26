@@ -226,3 +226,55 @@ def test_intent_batch_coverage_and_grounding():
 
 def test_explicit_later_negation_defeats_fast_path():
     assert classify('Please delete my account. Actually, do not delete it.').intent!='DELETE_REQUEST'
+
+
+def test_alias_association_time_is_enforced():
+    evidence=obs(fields={'identity_link_time':LATE})
+    assert not evidence.available(CUTOFF)
+
+
+def test_catalog_cannot_override_another_person(setup):
+    _,_,auditor=run(setup,[obs(state='ABSENT')])
+    other=obs('different-profile',ids=['other@example.test'])
+    auditor.corpus.by_resource[('account_service','different-profile')].append(other)
+    auditor.corpus.catalog_links=[('different-profile',{'alex@example.test'},EARLY,'catalog-proof')]
+    subject=auditor.identities.resolve('alex@example.test',CUTOFF)
+    assert ('account_service','different-profile') not in auditor.retrieve(subject,CUTOFF)
+    assert auditor.link_conflicts
+
+
+def test_filename_resolves_only_through_explicit_catalog():
+    from ghosttrace.types import VisualExtraction,VisualRecord
+    corpus=Corpus.__new__(Corpus);corpus.observations=[];corpus.notes=[];corpus.unresolved=[];corpus.known_names=set()
+    corpus.alias_links={'receipt.pdf':[dict(resource_id='object_876',target_system='object_storage',
+        details='receipt.pdf belongs to alex@example.test',event_time=LATE,activity_id='catalog-proof')]}
+    class Fake:
+        def generate(self,*args):
+            return VisualExtraction(records=[VisualRecord(resource_id='support_999',system_id='support_platform',
+                category='SUPPORT_ATTACHMENT',state='PRESENT',identifiers=['receipt.pdf'],supporting_text='receipt.pdf')],uncertainty='')
+    corpus.gemini=Fake()
+    corpus.visual(dict(file_id='image-proof',file_path='image.png',origin='object_storage',captured_at=EARLY),b'fake fixture','image')
+    assert corpus.observations[0].resource_id=='object_876'
+    assert corpus.observations[0].fields['identity_link_evidence']=='catalog-proof'
+    assert not corpus.observations[0].available(CUTOFF)
+
+
+def test_deletion_proof_requirement_is_not_english_only(setup):
+    status,_,auditor=run(setup,[obs('retained','SECURITY_AUDIT_LOG',system='security_service')],
+        text='Je demande la suppression définitive du compte.')
+    assert status=='INCOMPLETE' and auditor.diagnostics[0]['gaps']
+
+
+def test_visible_stable_tombstone_is_not_exposed_pii():
+    from ghosttrace.types import VisualExtraction,VisualRecord
+    corpus=Corpus.__new__(Corpus);corpus.observations=[];corpus.notes=[];corpus.unresolved=[];corpus.known_names=set()
+    corpus.alias_links={'user_88':[dict(resource_id='tombstone_456',target_system='identity_service',
+        details='Reference belongs to user_88',event_time=EARLY,activity_id='catalog-proof')]}
+    class Fake:
+        def generate(self,*args):
+            return VisualExtraction(records=[VisualRecord(resource_id='user_88',system_id='identity_service',
+                category='ACCOUNT_TOMBSTONE',state='PRESENT',identifiers=['user_88'],supporting_text='user_88 retained reference')],uncertainty='')
+    corpus.gemini=Fake()
+    # No invented suffix mapping; only the explicit alias association is valid.
+    corpus.visual(dict(file_id='image-proof',file_path='image.png',origin='identity_service',captured_at=EARLY),b'fixture','image')
+    assert corpus.observations[0].state=='REDACTED'

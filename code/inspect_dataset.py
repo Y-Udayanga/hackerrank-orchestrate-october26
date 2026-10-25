@@ -3,6 +3,8 @@ import csv
 import json
 import re
 import sqlite3
+import argparse
+import sys
 from collections import Counter,defaultdict
 from pathlib import Path
 
@@ -10,6 +12,9 @@ ROOT=Path(__file__).resolve().parents[1]
 
 
 def main():
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--render-pdfs',action='store_true')
+    args=parser.parse_args()
     lines=['# Participant dataset inspection','', 'No organizer files inspected. Values below are schema/enums, not answer lookups.','']
     for path in sorted((ROOT/'dataset').glob('*.csv')):
         with path.open(encoding='utf-8-sig',newline='') as f:
@@ -56,6 +61,13 @@ def main():
         '- SQL snapshot_scope lists systems, not an explicit exhaustive set of subject resources; absence is not inferred from missing rows.',
         '- Output must have 518 unique string-sorted target cases; samples are evaluation only.']
     (ROOT/'code/evaluation/dataset_inspection.md').write_text('\n'.join(lines),encoding='utf-8')
+    if args.render_pdfs:
+        if (ROOT/'.deps').is_dir():sys.path.insert(0,str(ROOT/'.deps'))
+        import pymupdf
+        dest=ROOT/'tmp/pdfs';dest.mkdir(parents=True,exist_ok=True)
+        for path in (ROOT/'dataset/evidence/documents').glob('*.pdf'):
+            with pymupdf.open(path) as doc:
+                for i,page in enumerate(doc):page.get_pixmap().save(dest/f'{path.stem}-{i+1}.png')
     print('Wrote participant schema inventory')
 
 

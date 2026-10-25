@@ -29,3 +29,5 @@ of the public answers. See tests/test_auditor.py for executable evidence and ass
 | SQL nested JSON | Parsed into typed observed state |
 | Future email change | New email cannot resolve a past subject |
 | Quoted deletion phrase | Not deletion authorization |
+
+Final independent test run: **38 passed** (pytest, Python 3.13.3). Additional tests cover Gemini retry bounds, structured-response rejection, content-cache behavior, secret redaction, catalog identity conflicts, and alias availability time.

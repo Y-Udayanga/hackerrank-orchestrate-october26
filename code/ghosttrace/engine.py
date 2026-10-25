@@ -21,13 +21,21 @@ class Auditor:
 
     def retrieve(self,subject,cutoff):
         keys=set()
+        self.link_conflicts=[]
         for ident in subject.identifiers:
             for key in self.corpus.by_identifier.get(ident,()):
                 if any(o.available(cutoff) and ident in o.identifiers for o in self.corpus.by_resource[key]):
                     keys.add(key)
         for resource,identifiers,time,proof in self.corpus.catalog_links:
             if timestamp(time)<=timestamp(cutoff) and identifiers & subject.identifiers:
-                keys.update(k for k in self.corpus.by_resource if k[1]==resource)
+                for key in self.corpus.by_resource:
+                    if key[1]!=resource:continue
+                    observed=[o for o in self.corpus.by_resource[key] if o.available(cutoff)]
+                    direct_ids=set().union(*(set(o.identifiers) for o in observed)) if observed else set()
+                    if direct_ids and not direct_ids & subject.identifiers:
+                        self.link_conflicts.append('Catalog link conflicts with direct subject identifiers: '+resource)
+                        continue
+                    keys.add(key)
         return {key:[o for o in self.corpus.by_resource[key] if o.available(cutoff)] for key in sorted(keys)}
 
     @staticmethod
@@ -62,9 +70,14 @@ class Auditor:
             return {'case_id':request['case_id'],'deletion_status':'INCOMPLETE','steps_json':'[]'}
         diagnostic['user_id']=subject.user_id
         resources=self.retrieve(subject,cutoff)
+        diagnostic['gaps'].extend(self.link_conflicts)
         desired=[];violations=[]
         for key,observations in resources.items():
             if not observations:continue
+            if request.get('requested_at') and all(o.state=='ABSENT' for o in observations) and max(
+                    timestamp(o.event_time) for o in observations)<timestamp(request['requested_at']):
+                diagnostic.setdefault('excluded_pre_request_absence',[]).append(key)
+                continue
             obs=self.latest(observations)
             try:remedy,state,verify,finding=self.policy.required(obs,cutoff)
             except ValueError as exc:
@@ -84,10 +97,13 @@ class Auditor:
                     continue
                 violations.append((obs,remedy,state,finding))
         if not desired:diagnostic['gaps'].append('No grounded resource state available by audit cutoff')
-        elif 'account' in request['request_text'].casefold() and not any(
+        elif not any(
                 o.category in {'USER_PROFILE','ACCOUNT_TOMBSTONE'} for o,_,_ in desired):
             diagnostic['gaps'].append('Account deletion audit lacks a grounded profile or tombstone state')
         if self.corpus.errors:diagnostic['gaps'].append('Evidence coverage incomplete; inspect ingestion report')
+        for item in getattr(self.corpus,'unresolved',[]):
+            if timestamp(item['captured_at'])<=timestamp(cutoff) and set(item['identifiers']) & subject.identifiers:
+                diagnostic['gaps'].append('Unresolved visual resource linked to subject in '+item['evidence_id'])
         status='INCOMPLETE' if violations or diagnostic['gaps'] else 'COMPLETE'
         steps=[]
         def add(obs,phase,op,state,evidence):

@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from ghosttrace.identity import read_csv
+from ghosttrace.identity import IdentityGraph
+from ghosttrace.types import timestamp
 from ghosttrace.types import validate_steps
 from metrics import evaluate
 
@@ -30,6 +32,10 @@ def main():
     results['format_invalid']=invalid
     diagnostics_path=ROOT/'.cache/run/diagnostics.json'
     diagnostics={r['case_id']:r for r in json.loads(diagnostics_path.read_text(encoding='utf-8'))} if diagnostics_path.exists() else {}
+    ledger_path=ROOT/'.cache/run/ledger.json'
+    ledger=json.loads(ledger_path.read_text(encoding='utf-8')) if ledger_path.exists() else []
+    requests={r['case_id']:r for r in read_csv(ROOT/'dataset/sample_deletion_requests.csv')}
+    identities=IdentityGraph(read_csv(ROOT/'dataset/user_identities.csv'),read_csv(ROOT/'dataset/user_audit_log.csv'))
     report='''# Public sample evaluation
 
 This is public-sample measurement, not a prediction of hidden leaderboard score.
@@ -59,8 +65,28 @@ matches score zero. Extra steps are penalized in precision, not field denominato
         if missing_keys & extra_keys:report+='Diagnosis: shared operations differ in state or evidence provenance; inspect timeline and source precedence.\n\n'
         elif failure['missing']:report+='Diagnosis: expected resources/operations absent from prediction; inspect grounded identity links, cutoff eligibility and category policy. No answer-derived identity link was inserted.\n\n'
         if failure['ordering_only']:report+='Diagnosis: ordering/step numbering differs.\n\n'
+        report+='Resource-level root-cause investigation:\n\n'
+        investigated=set()
+        for step in failure['missing']:
+            key=(step['system_id'],step['resource_id'])
+            if key in investigated:continue
+            investigated.add(key)
+            request=requests[failure['case_id']]
+            observations=[o for o in ledger if (o['system_id'],o['resource_id'])==key]
+            eligible=[o for o in observations if max(timestamp(o['event_time']),timestamp(o['captured_at']))<=timestamp(request['audit_at'])]
+            try:subject=identities.resolve(request['email'],request['audit_at'])
+            except ValueError:subject=None
+            linked=bool(subject and any(set(o['identifiers']) & subject.identifiers for o in eligible))
+            if not observations:reason='No explicit resource state was recovered from participant evidence; a workflow claim or absent row is not sufficient proof.'
+            elif not eligible:reason='Available observations were captured or occurred after this audit cutoff; using them would leak future information.'
+            elif not linked:reason='Eligible state exists, but no exact subject identifier is present on these observations. Anonymous/absent resources need an independent grounded link.'
+            else:reason='Resource is grounded: inspect selected category, scope, timestamp and citation against the expected operation; see per-case diagnostic ledger.'
+            report+=f'- {key[0]} / {key[1]}: {reason}\n'
+        report+='\n'
     custom=ROOT/'code/evaluation/custom_cases.md'
     if custom.exists():report+='\n'+custom.read_text(encoding='utf-8')
+    improvements=ROOT/'code/evaluation/improvements.md'
+    if improvements.exists():report+='\n'+improvements.read_text(encoding='utf-8')
     (ROOT/'code/evaluation/evaluation_report.md').write_text(report,encoding='utf-8')
     history=ROOT/'code/evaluation/history.md'
     with history.open('a',encoding='utf-8') as f:

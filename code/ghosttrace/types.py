@@ -29,7 +29,9 @@ class Observation(BaseModel):
     confidence: float = 1.0
 
     def available(self, cutoff: str) -> bool:
-        return max(timestamp(self.event_time), timestamp(self.captured_at)) <= timestamp(cutoff)
+        times=[timestamp(self.event_time),timestamp(self.captured_at)]
+        if self.fields.get('identity_link_time'):times.append(timestamp(self.fields['identity_link_time']))
+        return max(times) <= timestamp(cutoff)
 
 
 class Intent(BaseModel):

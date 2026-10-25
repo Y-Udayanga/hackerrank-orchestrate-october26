@@ -13,11 +13,11 @@ python -m venv .venv
 python -m pip install -r requirements.txt
 ```
 
-Set `GEMINI_API_KEY` in your process environment, or in an ignored root `.env`. Never commit or package credentials. `GEMINI_MODEL` selects the model; leaving it blank selects an available stable Flash candidate after API discovery. A model appearing in discovery does not guarantee generation entitlement; API errors remain visible. `--model` overrides the environment for a run.
+Set `GEMINI_API_KEY` in your process environment, or in an ignored root `.env`. Never commit or package credentials. `GEMINI_MODEL` selects the model; leaving it blank prefers the successfully tested Gemini 3.1 Flash-Lite if available, otherwise an available stable Flash candidate after API discovery. A model appearing in discovery does not guarantee generation entitlement; API errors remain visible. `--model` overrides the environment for a run.
 
 ```console
 python code/main.py --list-models
-python code/main.py --model gemini-3.8-flash
+python code/main.py --model gemini-3.1-flash-lite
 ```
 
 The default run reads `dataset/deletion_requests.csv`, validates its 518 rows, and atomically writes root `output.csv`. Inputs are never modified. Full processing fails on unreadable/corrupt evidence or API failure unless reduced-capability processing is explicitly selected.

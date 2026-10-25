@@ -56,7 +56,9 @@ calls with no usage metadata have unknown provider-side token usage; recorded
 tokens are the actual returned metadata, not estimates of unreported usage.
 Inference is serial (concurrency 1), with bounded retry and per-call timeout.
 Thinking tokens are reported separately and included once in total and output cost.
-Development model usage is not available through this application and is excluded.
+Coding-assistant usage is not available through this application and is excluded.
+Earlier cache-preparation calls are also excluded from these final-run totals.
+This is a warm-cache execution cost, not a cold-start project cost.
 '''
     path.parent.mkdir(parents=True,exist_ok=True);path.write_text(report,encoding='utf-8')
 
@@ -97,6 +99,13 @@ def main():
     write_output(args.output,rows,[r['case_id'] for r in requests])
     report_dir=ROOT/'code/evaluation'
     report_dir.mkdir(exist_ok=True)
+    import importlib.metadata
+    versions=[]
+    for package in ['google-genai','pydantic','python-dotenv','PyMuPDF','Pillow','pypdf','pytest']:
+        try:versions.append(package+'=='+importlib.metadata.version(package))
+        except importlib.metadata.PackageNotFoundError:versions.append(package+': not installed')
+    (report_dir/'runtime.md').write_text('# Verified execution runtime\n\nPython '+sys.version.split()[0]+'\n\n'+
+        '\n'.join('- '+version for version in versions)+'\n',encoding='utf-8')
     run_dir=ROOT/'.cache/run';run_dir.mkdir(parents=True,exist_ok=True)
     (run_dir/'diagnostics.json').write_text(json.dumps(auditor.diagnostics,ensure_ascii=False,indent=2),encoding='utf-8')
     (run_dir/'ledger.json').write_text(json.dumps([o.model_dump() for o in corpus.observations],ensure_ascii=False),encoding='utf-8')

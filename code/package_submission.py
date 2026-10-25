@@ -24,6 +24,10 @@ def main():
     evidence|={r['audit_id'] for r in read_csv(ROOT/'dataset/user_audit_log.csv')}
     for row in rows:validate_steps(row['deletion_status'],json.loads(row['steps_json']),evidence)
     files=[ROOT/name for name in ['README.md','ARCHITECTURE.md','requirements.txt','.env.example']]
+    import shutil
+    (ROOT/'evaluation').mkdir(exist_ok=True)
+    for name in ['evaluation_report.md','usage_report.md']:
+        shutil.copyfile(ROOT/'code/evaluation'/name,ROOT/'evaluation'/name)
     for folder in ['code','tests']:
         files += [p for p in (ROOT/folder).rglob('*') if p.is_file() and p.suffix in {'.py','.md','.ps1'} and '__pycache__' not in p.parts]
     # Compare with the actual local credential without printing it or storing it.
