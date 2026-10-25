@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+.deps/
+.venv/
+__pycache__/
+.pytest_cache/
+.cache/
+output.csv
+code.zip
+agent-trace.zip
+agent-trace/
+tmp/
