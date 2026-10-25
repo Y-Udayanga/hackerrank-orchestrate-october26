@@ -1085,6 +1085,8 @@ of the public answers. See tests/test_auditor.py for executable evidence and ass
 | Future email change | New email cannot resolve a past subject |
 | Quoted deletion phrase | Not deletion authorization |
 
+Final independent test run: **38 passed** (pytest, Python 3.13.3). Additional tests cover Gemini retry bounds, structured-response rejection, content-cache behavior, secret redaction, catalog identity conflicts, and alias availability time.
+
 ## Failures found and general improvements
 
 1. Initial offline baseline: image coverage gaps caused conservative incomplete
@@ -1124,7 +1126,3 @@ pre-cutoff subject link, or rely on an absent record in a snapshot without an
 explicit resource lookup. Mapping them by numeric suffix, case ID, answer lookup,
 future evidence or ambiguous workflow timing would violate the requested contract.
 The per-failure report distinguishes these from extraction and policy defects.
-
-## Final independent test result
-
-36 tests passed on Python 3.13.3, including all 15 requested scenarios, API retry/cache/schema validation, SQL isolation and temporal identity-link checks.

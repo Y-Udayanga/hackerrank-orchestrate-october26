@@ -731,3 +731,49 @@ repo_root=C:\Users\yasin\Documents\hackerrank-orchestrate\Ghost agent\hackerrank
 worktree=main
 parent_agent=none
 
+
+Build result update (continuation of the logged master build request)
+Timestamp: 2026-10-25T11:31:42.848567+00:00
+Implemented and packaged the Python/Gemini hybrid auditor. Actual Gemini model: gemini-3.1-flash-lite; final warm-cache run used 22 cached extractions and one model discovery request. All 38 tests passed. Public sample results: 24/32 status matches, step F1 81.1268%, exact sequences 8/32. Independently validated 518 output rows and 856 time-safe citations. There remain 344 cases with investigation gaps, including 11 authorized cases without supported steps; no unsupported findings were invented. Packaged code.zip with evaluation reports and no credentials, dataset, or caches. Dataset Git diff is empty. Raw trace export must occur after this session closes, as required by agent_trace_instructions.md.
+
+## [2026-10-25T11:42:43.290791+00:00] Terminal run instructions
+
+User Prompt (verbatim, secrets redacted):
+how ro test run this application, give the run therminal code
+
+Agent Response Summary:
+Read the project README and supplied PowerShell setup, test, sample evaluation, full prediction, and validation commands. Use the existing ignored .env for Gemini credentials and invoke the virtual environment Python directly to avoid activation-policy issues.
+
+Actions:
+* Read README.md
+* Provided terminal commands; did not rerun inference
+
+Context:
+tool=Codex Desktop
+model=gpt-6-astra
+branch=main
+repo_root=C:\Users\yasin\Documents\hackerrank-orchestrate\Ghost agent\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T12:02:32.051545+00:00] Local browser application
+
+User Prompt (verbatim, secrets redacted):
+give me the smothly run project link(like localhost link)
+
+Agent Response Summary:
+Implemented and started a loopback-only web interface at http://localhost:8000 with searchable saved cases, action-plan details, CSV download, and a protected full-audit launch button. Verified HTTP responses and all 518 saved cases, plus rejection of credential-file access and unauthorized run requests. All 38 existing tests passed using a fresh temporary directory after Windows permissions blocked the old pytest temporary/cache locations. Rebuilt code.zip and documented startup in README.md.
+
+Actions:
+* Added code/web.py
+* Updated README.md and code.zip
+* Started local server; checked HTTP routes
+* Ran 38 tests successfully
+
+Context:
+tool=Codex Desktop
+model=gpt-6-astra
+branch=main
+repo_root=C:\Users\yasin\Documents\hackerrank-orchestrate\Ghost agent\hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none

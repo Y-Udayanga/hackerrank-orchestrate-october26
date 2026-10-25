@@ -36,6 +36,19 @@ Evidence adapters handle nested JSON, seven log layouts, SQLite tables and JSON 
 
 `dataset/deletion_rules.csv` remains the policy authority. Unsupported rule conditions fail visibly. Retention, tombstones, replication, synchronization and backup restore access are handled separately. The tool writes plans only; it has no deletion-execution capability.
 
+## Local browser application
+
+Run `python code/web.py` from the repository root, then open
+[http://localhost:8000](http://localhost:8000). Keep that terminal running.
+If using a virtual environment on Windows, run
+`.\.venv\Scripts\python.exe code/web.py` instead. Stop with Ctrl+C.
+
+The browser shows saved output, searchable cases, individual action plans, and a
+CSV download. **Run full audit** launches the existing Gemini pipeline; it may
+incur API charges and replaces output.csv only on success. Only one browser-started
+audit runs at a time. Credentials are read by the backend from your environment
+or ignored .env file. The server binds only to this computer, not your network.
+
 ## Evaluation and tests
 
 ```console
